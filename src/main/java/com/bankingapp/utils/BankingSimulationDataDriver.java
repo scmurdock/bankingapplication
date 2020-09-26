@@ -1,10 +1,11 @@
 package com.bankingapp.utils;
 import com.bankingapp.model.Customer;
+import com.bankingapp.model.KafkaTopicMessage;
 import com.google.gson.Gson;
 
 import java.util.*;
 
-public class SimulationDataDriver {
+public class BankingSimulationDataDriver {
 
     private static String[] lastNames = {"Jones", "Smith", "Ahmed", "Wu", "Doshi", "Anandh", "Clayton", "Harris", "Gonzalez", "Abram", "Khatib", "Clark", "Mitra", "Habschied", "Jackson", "Phillips", "Lincoln", "Spencer", "Anderson", "Hansen", "Davis", "Jones", "Fibonnaci", "Staples", "Jefferson", "Huey", "Olson", "Howard", "Sanchez", "Aristotle"};
     private static String[] firstNames = {"Sarah", "Bobby", "Frank", "Edward", "Danny", "Chris", "Spencer", "Ashley", "Santosh", "Senthil", "Christina", "Suresh", "Neeraj", "Angie", "Sean", "Lyn", "John", "Ben", "Travis", "David", "Larry", "Jerry", "Gail", "Craig", "Dan", "Jason", "Eric", "Trevor", "Jane", "Jacob", "Jaya", "Manoj", "Liz", "Christina"};
@@ -12,15 +13,7 @@ public class SimulationDataDriver {
     private static Random random = new Random();
     private static Gson gson = new Gson();
     private static boolean simulationActive = false;
-    private static Map<String, Long> mostRecentTestTime = new HashMap<String, Long>();
 
-    public static synchronized void setSimulationActive(boolean active){
-        simulationActive= active;
-    }
-
-    public static synchronized  boolean getSimulationActive(){
-        return simulationActive;
-    }
 
     public static synchronized void generateTestCustomers(int numberOfUsers) {
         testCustomers.clear();
@@ -42,6 +35,21 @@ public class SimulationDataDriver {
             }
         }
 
+    }
+
+    public static void createBalanceUpdates(){
+        for (Customer testCustomer:testCustomers){
+            try {
+                KafkaTopicMessage balanceMessage = new KafkaTopicMessage();
+                balanceMessage.setTopic("balance-updates");
+                balanceMessage.setKey(Long.valueOf(testCustomer.getAccountNumber()));
+                balanceMessage.setMessage(String.valueOf(random.nextInt(100000)) + "." + String.valueOf(random.nextInt(99)));
+                MessageIntake.route(balanceMessage);
+                Thread.sleep(2000);
+            } catch (Exception e){
+                System.out.println("Error sending balance update for customer: "+testCustomer.getCustomerName()+" "+e.getMessage());
+            }
+        }
     }
 
 }

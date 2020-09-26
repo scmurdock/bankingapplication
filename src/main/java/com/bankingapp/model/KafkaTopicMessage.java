@@ -3,7 +3,16 @@ package com.bankingapp.model;
 public class KafkaTopicMessage {
 
     private String topic;
+    private Long key;
     private String message;
+
+    public Long getKey() {
+        return key;
+    }
+
+    public void setKey(Long key) {
+        this.key = key;
+    }
 
     public String getTopic() {
         return topic;

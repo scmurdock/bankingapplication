@@ -9,9 +9,10 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-public class KafkaTopicProducerActor extends UntypedActor {
-    private static Logger logger = Logger.getLogger(KafkaTopicProducerActor.class.getName());
+public class KafkaKeyValueTopicProducerActor extends UntypedActor {
+    private static Logger logger = Logger.getLogger(KafkaKeyValueTopicProducerActor.class.getName());
     private Optional<Producer<Long,String>> kafkaProducer = Optional.empty();
+
 
     public void onReceive(Object object){
 
@@ -21,10 +22,11 @@ public class KafkaTopicProducerActor extends UntypedActor {
                 logger.info("Creating Kafka Producer");
                 kafkaProducer = Optional.of(KafkaProducerUtil.createProducer());
             }
-            logger.info("Sending to Kafka Topic: "+kafkaTopicMessage.getTopic());
+            logger.info("Sending to Kafka Topic: "+kafkaTopicMessage.getTopic()+" message: "+kafkaTopicMessage.getMessage());
 
-            ProducerRecord<Long, String> record = new ProducerRecord<Long, String>(kafkaTopicMessage.getTopic(), System.currentTimeMillis(),kafkaTopicMessage.getMessage());
+            ProducerRecord<Long, String> record = new ProducerRecord<Long, String>(kafkaTopicMessage.getTopic(), kafkaTopicMessage.getKey(),kafkaTopicMessage.getMessage());
             kafkaProducer.get().send(record);
+            kafkaProducer.get().flush();
         }
 
     }

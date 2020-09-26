@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class KafkaProducerUtil {
 
-    private final static String BOOTSTRAP_SERVERS = "localhost:9092";
+    private final static String BOOTSTRAP_SERVERS = Configuration.getConfiguration().getString("kafka.bootstrap.server")+":"+Configuration.getConfiguration().getString("kafka.bootstrap.port");
 
     public static Producer<Long, String>    createProducer(){
 
